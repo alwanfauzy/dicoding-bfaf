@@ -28,7 +28,7 @@ A restaurant app based on flutter.
    - atau yang lainnya.
 
 ## Hasil Submission
-> Rating (5/5) : :star: :star: :star: :star: :star:   
+Rating (5/5): :star: :star: :star: :star: :star:   
 
 ![Dokumentasi Aplikasi](https://drive.google.com/uc?id=1DZ3MltMjeg_1OnaN5ckDaPfWtU69a1d2)
   
