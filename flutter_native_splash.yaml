@@ -1,0 +1,5 @@
+# Splash screen
+# Params : image, color, android_disable_fullscreen, ios/android: false, 
+flutter_native_splash: 
+  image: assets/restoapp.png
+  color: "8b6b61" # primaryLightColor
