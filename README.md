@@ -37,7 +37,7 @@ Rating: :star: :star: :star: :star: :star:
 
 > **Saya tidak bertanggung jawab atas hukuman plagiasi dari pihak dicoding, projek ini saya bagikan sebagai referensi dan *showcase* dari projek yang telah saya kerjakan.**
 
-Terima kasih telah mengunjungi repo ini. Bantu dukung saya dengan menambahkan bintang pada projek ini. :smiley:
+Terima kasih telah mengunjungi repo ini, semoga bisa bermanfaat. Bantu dukung saya dengan menambahkan bintang pada projek ini. :smiley:
 
 Kunjungi juga projek terkait yang telah saya buat :
 
