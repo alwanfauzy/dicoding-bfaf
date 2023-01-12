@@ -106,51 +106,52 @@ class HomePage extends StatelessWidget {
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
         child: GridTile(
-            header: GridTileBar(
-              leading: const CircleAvatar(
-                radius: 16,
-                backgroundColor: primaryLightColor,
-                child: Icon(
-                  Icons.restaurant_menu,
-                  color: primaryColor,
-                ),
-              ),
-              title: Text(restaurant.name,
-                  style:
-                      Theme.of(context).textTheme.bodyMedium?.merge(textWhite)),
-              subtitle: Text(restaurant.city,
-                  style:
-                      Theme.of(context).textTheme.bodySmall?.merge(textWhite)),
-            ),
-            footer: GridTileBar(
-              title: RatingBar.builder(
-                initialRating: restaurant.rating,
-                minRating: 1,
-                direction: Axis.horizontal,
-                allowHalfRating: true,
-                itemCount: 5,
-                itemSize: starSize,
-                itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-                itemBuilder: (context, _) => const Icon(
-                  Icons.star,
-                  color: secondaryLightColor,
-                ),
-                onRatingUpdate: (rating) {},
+          header: GridTileBar(
+            leading: const CircleAvatar(
+              radius: 16,
+              backgroundColor: primaryLightColor,
+              child: Icon(
+                Icons.restaurant_menu,
+                color: primaryColor,
               ),
             ),
-            child: Hero(
-                tag: pictureUrl,
-                child: Stack(children: [
-                  Positioned.fill(
-                    child: Image.network(
-                      pictureUrl,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Container(
-                    color: Colors.black.withOpacity(0.6),
-                  )
-                ]))),
+            title: Text(restaurant.name,
+                style:
+                    Theme.of(context).textTheme.bodyMedium?.merge(textWhite)),
+            subtitle: Text(restaurant.city,
+                style: Theme.of(context).textTheme.bodySmall?.merge(textWhite)),
+          ),
+          footer: GridTileBar(
+            title: RatingBar.builder(
+              initialRating: restaurant.rating,
+              minRating: 1,
+              direction: Axis.horizontal,
+              allowHalfRating: true,
+              itemCount: 5,
+              itemSize: starSize,
+              itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
+              itemBuilder: (context, _) => const Icon(
+                Icons.star,
+                color: secondaryLightColor,
+              ),
+              onRatingUpdate: (rating) {},
+            ),
+          ),
+          child: Hero(
+            tag: pictureUrl,
+            child: Stack(children: [
+              Positioned.fill(
+                child: Image.network(
+                  pictureUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Container(
+                color: Colors.black.withOpacity(0.6),
+              )
+            ]),
+          ),
+        ),
       ),
     );
   }
