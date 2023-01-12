@@ -1,34 +1,81 @@
 import 'dart:convert';
 
-import 'restaurant_element.dart';
-
-class Restaurant {
-  Restaurant({
+class RestaurantResult {
+  RestaurantResult({
+    required this.error,
+    required this.message,
+    required this.count,
     required this.restaurants,
   });
 
-  List<RestaurantElement> restaurants;
+  final bool? error;
+  final String? message;
+  final int? count;
+  final List<Restaurant?>? restaurants;
 
-  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
-        restaurants: List<RestaurantElement>.from(
-            json["restaurants"].map((x) => RestaurantElement.fromJson(x))),
+  factory RestaurantResult.fromRawJson(String str) =>
+      RestaurantResult.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory RestaurantResult.fromJson(Map<String, dynamic> json) =>
+      RestaurantResult(
+        error: json["error"],
+        message: json["message"],
+        count: json["count"],
+        restaurants: json["restaurants"] == null
+            ? []
+            : List<Restaurant?>.from(
+                json["restaurants"]!.map((x) => Restaurant.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
-        "restaurants": List<dynamic>.from(restaurants.map((x) => x.toJson())),
+        "error": error,
+        "message": message,
+        "count": count,
+        "restaurants": restaurants == null
+            ? []
+            : List<dynamic>.from(restaurants!.map((x) => x!.toJson())),
       };
 }
 
-List<RestaurantElement> restaurantFromJson(String? json) {
-  if (json == null) {
-    return [];
-  }
+class Restaurant {
+  Restaurant({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.pictureId,
+    required this.city,
+    required this.rating,
+  });
 
-  final Map<String, dynamic> parsed = jsonDecode(json);
-  List<RestaurantElement> parsedRestaurant =
-      Restaurant.fromJson(parsed).restaurants;
+  String id;
+  String name;
+  String? description;
+  String? pictureId;
+  String? city;
+  double? rating;
 
-  return parsedRestaurant;
+  factory Restaurant.fromRawJson(String str) =>
+      Restaurant.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
+        id: json["id"],
+        name: json["name"],
+        description: json["description"],
+        pictureId: json["pictureId"],
+        city: json["city"],
+        rating: json["rating"].toDouble(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "description": description,
+        "pictureId": pictureId,
+        "city": city,
+        "rating": rating,
+      };
 }
-
-String restaurantToJson(Restaurant data) => json.encode(data.toJson());

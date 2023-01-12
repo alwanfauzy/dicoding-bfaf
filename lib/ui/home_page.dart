@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:resto_app/common/styles.dart';
+import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/model/restaurant.dart';
-import 'package:resto_app/data/model/restaurant_element.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
 import 'package:resto_app/widget/error_text.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   static const routeName = "/restaurant_list_page";
 
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late Future<RestaurantResult> _restaurants;
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurants = ApiService().listRestaurant();
+  }
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -73,31 +86,45 @@ class HomePage extends StatelessWidget {
 
   Widget _buildRestaurantGrid(BuildContext context) {
     return FutureBuilder(
-        future: DefaultAssetBundle.of(context)
-            .loadString('assets/local_restaurant.json'),
-        builder: (context, snapshot) {
+        future: _restaurants,
+        builder: (context, AsyncSnapshot<RestaurantResult> snapshot) {
           try {
-            final List<RestaurantElement> restaurants =
-                restaurantFromJson(snapshot.data);
+            var state = snapshot.connectionState;
+            if (state != ConnectionState.done) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            } else {
+              if (snapshot.hasData) {
+                var restaurants = snapshot.data?.restaurants ?? List.empty();
 
-            return GridView.count(
-              crossAxisCount: 2,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              crossAxisSpacing: 16.0,
-              mainAxisSpacing: 16.0,
-              children: List.generate(restaurants.length,
-                  (index) => _buildRestaurantItem(context, restaurants[index])),
-            );
+                return GridView.count(
+                  crossAxisCount: 2,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                  children: List.generate(
+                      restaurants.length,
+                      (index) =>
+                          _buildRestaurantItem(context, restaurants[index]!)),
+                );
+              } else if (snapshot.hasError) {
+                return const ErrorText(errorMessage: "Connection Error");
+              } else {
+                return const ErrorText(
+                  errorMessage: "Empty Data",
+                );
+              }
+            }
           } catch (e) {
-            return ErrorText(error: e);
+            return ErrorText(errorMessage: e.toString());
           }
         });
   }
 
-  Widget _buildRestaurantItem(
-      BuildContext context, RestaurantElement restaurant) {
+  Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
     double starSize = MediaQuery.of(context).size.width * 0.03;
-    String pictureUrl = restaurant.pictureId;
 
     return InkWell(
       borderRadius: const BorderRadius.all(Radius.circular(15)),
@@ -118,12 +145,12 @@ class HomePage extends StatelessWidget {
             title: Text(restaurant.name,
                 style:
                     Theme.of(context).textTheme.bodyMedium?.merge(textWhite)),
-            subtitle: Text(restaurant.city,
+            subtitle: Text(restaurant.city ?? "-",
                 style: Theme.of(context).textTheme.bodySmall?.merge(textWhite)),
           ),
           footer: GridTileBar(
             title: RatingBar.builder(
-              initialRating: restaurant.rating,
+              initialRating: restaurant.rating ?? 0,
               minRating: 1,
               direction: Axis.horizontal,
               allowHalfRating: true,
@@ -138,11 +165,12 @@ class HomePage extends StatelessWidget {
             ),
           ),
           child: Hero(
-            tag: pictureUrl,
+            tag: restaurant.id,
             child: Stack(children: [
               Positioned.fill(
                 child: Image.network(
-                  pictureUrl,
+                  ApiService()
+                      .picture(restaurant.pictureId!, PictureSize.small),
                   fit: BoxFit.cover,
                 ),
               ),

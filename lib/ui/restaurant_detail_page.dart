@@ -1,18 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:resto_app/common/styles.dart';
-import 'package:resto_app/data/model/restaurant_element.dart';
+import 'package:resto_app/data/api/api_service.dart';
+import 'package:resto_app/data/model/restaurant.dart';
+import 'package:resto_app/data/model/restaurant_detail.dart';
+import 'package:resto_app/widget/error_text.dart';
 
-import '../data/model/beverage.dart';
-
-class RestaurantDetailPage extends StatelessWidget {
+class RestaurantDetailPage extends StatefulWidget {
   static const routeName = "/restaurant_detail";
 
-  final RestaurantElement restaurant;
+  final Restaurant restaurant;
 
   const RestaurantDetailPage({super.key, required this.restaurant});
 
-  Widget _buildRestaurantInfo(BuildContext context) {
+  @override
+  State<RestaurantDetailPage> createState() => _RestaurantDetailPageState();
+}
+
+class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  late Future<RestaurantDetailResult> _restaurantDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurantDetail = ApiService().detailRestaurant(widget.restaurant.id);
+  }
+
+  Widget _buildDetail(BuildContext context) {
+    return FutureBuilder(
+      future: _restaurantDetail,
+      builder: ((context, AsyncSnapshot<RestaurantDetailResult> snapshot) {
+        try {
+          var state = snapshot.connectionState;
+          if (state != ConnectionState.done) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else {
+            if (snapshot.hasData) {
+              var restaurantDetail = snapshot.data?.restaurant;
+
+              return SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Column(
+                    children: [
+                      _buildRestaurantInfo(context, restaurantDetail),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      _buildRestaurantMenu(context, restaurantDetail?.menus)
+                    ],
+                  ),
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return const ErrorText(errorMessage: "Connection Error");
+            } else {
+              return const Text('');
+            }
+          }
+        } catch (e) {
+          return ErrorText(errorMessage: e.toString());
+        }
+      }),
+    );
+  }
+
+  Widget _buildRestaurantInfo(BuildContext context, RestaurantDetail? detail) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -36,7 +92,7 @@ class RestaurantDetailPage extends StatelessWidget {
                     width: 8,
                   ),
                   Text(
-                    restaurant.city,
+                    detail?.city ?? "-",
                     style:
                         Theme.of(context).textTheme.bodyLarge?.merge(textWhite),
                   )
@@ -47,7 +103,7 @@ class RestaurantDetailPage extends StatelessWidget {
               width: 8,
             ),
             RatingBar.builder(
-              initialRating: restaurant.rating,
+              initialRating: detail?.rating ?? 0,
               minRating: 1,
               direction: Axis.horizontal,
               allowHalfRating: true,
@@ -67,7 +123,7 @@ class RestaurantDetailPage extends StatelessWidget {
           thickness: 1,
         ),
         Text(
-          restaurant.description,
+          detail?.description ?? "Empty Description",
           textAlign: TextAlign.justify,
           style: Theme.of(context).textTheme.bodyMedium?.merge(textWhite),
         )
@@ -75,7 +131,7 @@ class RestaurantDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildRestaurantMenu(BuildContext context) {
+  Widget _buildRestaurantMenu(BuildContext context, Menus? menu) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -83,19 +139,19 @@ class RestaurantDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _buildBeverageList(context, "Available Foods", restaurant.menus.foods),
-        const Divider(
-          thickness: 1,
-          color: primaryLightColor,
-        ),
-        _buildBeverageList(
-            context, "Available Drinks", restaurant.menus.drinks),
+        if (menu != null) ...[
+          _buildBeverageList(context, "Available Foods", menu.foods),
+          const Divider(thickness: 1, color: primaryLightColor),
+          _buildBeverageList(context, "Available Drinks", menu.drinks),
+        ] else ...[
+          const ErrorText(errorMessage: "Empty Menus")
+        ]
       ]),
     );
   }
 
   Widget _buildBeverageList(
-      BuildContext context, String title, List<Beverage> beverages) {
+      BuildContext context, String title, List<Category?>? beverages) {
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text(
         title,
@@ -104,16 +160,20 @@ class RestaurantDetailPage extends StatelessWidget {
       const SizedBox(
         height: 8,
       ),
-      Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: List.generate(beverages.length,
-            (index) => _buildBeverageItem(context, beverages[index])),
-      )
+      if (beverages == null) ...[
+        const ErrorText(errorMessage: "Empty"),
+      ] else ...[
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: List.generate(beverages.length,
+              (index) => _buildBeverageItem(context, beverages[index])),
+        ),
+      ]
     ]);
   }
 
-  Widget _buildBeverageItem(BuildContext context, Beverage beverage) {
+  Widget _buildBeverageItem(BuildContext context, Category? beverage) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: const BoxDecoration(
@@ -121,7 +181,7 @@ class RestaurantDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(4)),
       ),
       child: Text(
-        beverage.name,
+        beverage?.name ?? "-",
         style: Theme.of(context).textTheme.bodySmall?.merge(textWhite),
       ),
     );
@@ -132,47 +192,34 @@ class RestaurantDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: primaryLightColor,
       body: NestedScrollView(
-        headerSliverBuilder: ((context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: 250,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Hero(
-                  tag: restaurant.pictureId,
-                  child: Stack(children: [
-                    Positioned.fill(
-                      child: Image.network(
-                        restaurant.pictureId,
-                        fit: BoxFit.cover,
+          headerSliverBuilder: ((context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                pinned: true,
+                expandedHeight: 250,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Hero(
+                    tag: widget.restaurant.id,
+                    child: Stack(children: [
+                      Positioned.fill(
+                        child: Image.network(
+                          ApiService().picture(
+                              widget.restaurant.pictureId!, PictureSize.medium),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                    Container(
-                      color: Colors.black.withOpacity(0.6),
-                    )
-                  ]),
+                      Container(
+                        color: Colors.black.withOpacity(0.6),
+                      )
+                    ]),
+                  ),
+                  title: Text(widget.restaurant.name),
+                  titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
                 ),
-                title: Text(restaurant.name),
-                titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
               ),
-            ),
-          ];
-        }),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              children: [
-                _buildRestaurantInfo(context),
-                const SizedBox(
-                  height: 16,
-                ),
-                _buildRestaurantMenu(context)
-              ],
-            ),
-          ),
-        ),
-      ),
+            ];
+          }),
+          body: _buildDetail(context)),
     );
   }
 }
