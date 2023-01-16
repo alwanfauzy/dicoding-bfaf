@@ -2,12 +2,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/data/model/restaurant_detail.dart';
+import 'package:resto_app/data/model/restaurant_search.dart';
+import 'package:resto_app/util/enums.dart';
 
 class ApiService {
   static const String _baseUrl = 'https://restaurant-api.dicoding.dev';
   static const String _getListRestaurant = "$_baseUrl/list";
   static const String _getDetailRestaurant = "$_baseUrl/detail";
   static const String _getPicture = "$_baseUrl/images";
+  static const String _getSearch = "$_baseUrl/search";
 
   Future<RestaurantResult> listRestaurant() async {
     final response = await http.get(Uri.parse(_getListRestaurant));
@@ -39,6 +42,15 @@ class ApiService {
         return "$_getPicture/big/$pictureId";
     }
   }
-}
 
-enum PictureSize { small, medium, big }
+  Future<RestaurantSearchResult> searchRestaurant(String query) async {
+    String url = "$_getSearch?q=$query";
+
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode == 200) {
+      return RestaurantSearchResult.fromJson(json.decode(response.body));
+    } else {
+      throw Exception('Failed to search restaurant');
+    }
+  }
+}

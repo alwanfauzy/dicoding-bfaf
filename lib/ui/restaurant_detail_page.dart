@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/data/model/restaurant_detail.dart';
+import 'package:resto_app/provider/restaurant_detail_provider.dart';
+import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';
 
 class RestaurantDetailPage extends StatefulWidget {
@@ -27,45 +30,37 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
   }
 
   Widget _buildDetail(BuildContext context) {
-    return FutureBuilder(
-      future: _restaurantDetail,
-      builder: ((context, AsyncSnapshot<RestaurantDetailResult> snapshot) {
-        try {
-          var state = snapshot.connectionState;
-          if (state != ConnectionState.done) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            if (snapshot.hasData) {
-              var restaurantDetail = snapshot.data?.restaurant;
+    return Consumer<RestaurantDetailProvider>(builder: ((context, value, _) {
+      switch (value.state) {
+        case ResultState.loading:
+          return const Center(child: CircularProgressIndicator());
+        case ResultState.hasData:
+          {
+            var restaurantDetail = value.result.restaurant;
 
-              return SingleChildScrollView(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  child: Column(
-                    children: [
-                      _buildRestaurantInfo(context, restaurantDetail),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      _buildRestaurantMenu(context, restaurantDetail?.menus)
-                    ],
-                  ),
+            return SingleChildScrollView(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    _buildRestaurantInfo(context, restaurantDetail),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    _buildRestaurantMenu(context, restaurantDetail?.menus)
+                  ],
                 ),
-              );
-            } else if (snapshot.hasError) {
-              return const ErrorText(errorMessage: "Connection Error");
-            } else {
-              return const Text('');
-            }
+              ),
+            );
           }
-        } catch (e) {
-          return ErrorText(errorMessage: e.toString());
-        }
-      }),
-    );
+        case ResultState.noData:
+        case ResultState.error:
+          return ErrorText(errorMessage: value.message);
+        default:
+          return const Center(child: Text(''));
+      }
+    }));
   }
 
   Widget _buildRestaurantInfo(BuildContext context, RestaurantDetail? detail) {
@@ -192,34 +187,39 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
     return Scaffold(
       backgroundColor: primaryLightColor,
       body: NestedScrollView(
-          headerSliverBuilder: ((context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                pinned: true,
-                expandedHeight: 250,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Hero(
-                    tag: widget.restaurant.id,
-                    child: Stack(children: [
-                      Positioned.fill(
-                        child: Image.network(
-                          ApiService().picture(
-                              widget.restaurant.pictureId!, PictureSize.medium),
-                          fit: BoxFit.cover,
-                        ),
+        headerSliverBuilder: ((context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              pinned: true,
+              expandedHeight: 250,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Hero(
+                  tag: widget.restaurant.id,
+                  child: Stack(children: [
+                    Positioned.fill(
+                      child: Image.network(
+                        ApiService().picture(
+                            widget.restaurant.pictureId!, PictureSize.medium),
+                        fit: BoxFit.cover,
                       ),
-                      Container(
-                        color: Colors.black.withOpacity(0.6),
-                      )
-                    ]),
-                  ),
-                  title: Text(widget.restaurant.name),
-                  titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
+                    ),
+                    Container(
+                      color: Colors.black.withOpacity(0.6),
+                    )
+                  ]),
                 ),
+                title: Text(widget.restaurant.name),
+                titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
               ),
-            ];
-          }),
-          body: _buildDetail(context)),
+            ),
+          ];
+        }),
+        body: ChangeNotifierProvider<RestaurantDetailProvider>(
+          create: (_) => RestaurantDetailProvider(
+              apiService: ApiService(), id: widget.restaurant.id),
+          child: _buildDetail(context),
+        ),
+      ),
     );
   }
 }

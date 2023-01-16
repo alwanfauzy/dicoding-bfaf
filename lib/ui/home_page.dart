@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/model/restaurant.dart';
+import 'package:resto_app/provider/restaurant_provider.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
+import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';
 
 class HomePage extends StatefulWidget {
@@ -16,111 +21,125 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late Future<RestaurantResult> _restaurants;
+  String _searchText = "";
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _restaurants = ApiService().listRestaurant();
+  }
+
+  _onSearchChanged(String text, RestaurantProvider provider) {
+    if (_debounce?.isActive ?? false) {
+      _debounce?.cancel();
+    }
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (text.isEmpty) {
+        provider.fetchAllRestaurant();
+      } else if (_searchText != text) {
+        _searchText = text;
+        provider.searchRestaurant(_searchText);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-          color: primaryColor,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(
-                height: 24,
-              ),
-              const Text(
-                "Discover",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
-              ),
-              const Text(
-                "Restaurant",
-                style: TextStyle(
-                    fontSize: 49,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-              Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    color: primaryLightColor,
-                    borderRadius: BorderRadius.circular(15)),
-                child: TextField(
-                  textAlignVertical: TextAlignVertical.center,
-                  style:
-                      Theme.of(context).textTheme.bodyText2?.merge(textWhite),
-                  decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Colors.white,
-                      ),
-                      hintText: "Search you're looking for",
-                      hintStyle: TextStyle(color: Colors.white, fontSize: 15)),
+    return Consumer<RestaurantProvider>(builder: ((context, provider, __) {
+      return Container(
+        decoration: const BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(15))),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 24,
                 ),
-              ),
-              const SizedBox(
-                height: 8,
-              ),
-            ],
+                const Text(
+                  "Discover",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white),
+                ),
+                const Text(
+                  "Restaurant",
+                  style: TextStyle(
+                      fontSize: 49,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      color: primaryLightColor,
+                      borderRadius: BorderRadius.circular(15)),
+                  child: TextField(
+                    onChanged: (text) => _onSearchChanged(text, provider),
+                    textAlignVertical: TextAlignVertical.center,
+                    style:
+                        Theme.of(context).textTheme.bodyText2?.merge(textWhite),
+                    decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        ),
+                        hintText: "Search you're looking for",
+                        hintStyle:
+                            TextStyle(color: Colors.white, fontSize: 15)),
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }));
   }
 
-  Widget _buildRestaurantGrid(BuildContext context) {
-    return FutureBuilder(
-        future: _restaurants,
-        builder: (context, AsyncSnapshot<RestaurantResult> snapshot) {
-          try {
-            var state = snapshot.connectionState;
-            if (state != ConnectionState.done) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            } else {
-              if (snapshot.hasData) {
-                var restaurants = snapshot.data?.restaurants ?? List.empty();
+  Widget _buildRestaurantGrid(BuildContext context, bool isSearchMode) {
+    return Consumer<RestaurantProvider>(builder: ((context, state, __) {
+      switch (state.state) {
+        case ResultState.loading:
+          return const Center(child: CircularProgressIndicator());
+        case ResultState.hasData:
+          {
+            var restaurants = state.result;
 
-                return GridView.count(
-                  crossAxisCount: 2,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  children: List.generate(
-                      restaurants.length,
-                      (index) =>
-                          _buildRestaurantItem(context, restaurants[index]!)),
-                );
-              } else if (snapshot.hasError) {
-                return const ErrorText(errorMessage: "Connection Error");
-              } else {
-                return const ErrorText(
-                  errorMessage: "Empty Data",
-                );
-              }
-            }
-          } catch (e) {
-            return ErrorText(errorMessage: e.toString());
+            return GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              crossAxisSpacing: 16.0,
+              mainAxisSpacing: 16.0,
+              children: List.generate(
+                  restaurants!.length,
+                  (index) =>
+                      _buildRestaurantItem(context, restaurants[index]!)),
+            );
           }
-        });
+        case ResultState.noData:
+        case ResultState.error:
+          return ErrorText(errorMessage: state.message);
+        default:
+          return const Center(child: Text(''));
+      }
+    }));
   }
 
   Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
@@ -187,12 +206,17 @@ class _HomePageState extends State<HomePage> {
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
         backgroundColor: primaryLightColor,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            Expanded(child: _buildRestaurantGrid(context)),
-          ],
+        body: ChangeNotifierProvider<RestaurantProvider>(
+          create: (context) => RestaurantProvider(apiService: ApiService()),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              Expanded(
+                child: _buildRestaurantGrid(context, false),
+              ),
+            ],
+          ),
         ));
   }
 
