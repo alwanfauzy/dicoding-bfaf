@@ -47,4 +47,10 @@ final TextTheme textTheme = TextTheme(
 );
 
 const TextStyle textWhite = TextStyle(color: Colors.white);
-const TextStyle textSecondaryLight = TextStyle(color: secondaryLightColor);
+const TextStyle textBlack = TextStyle(color: Colors.black);
+const TextStyle textPrimary = TextStyle(color: primaryColor);
+
+const TextStyle textBold = TextStyle(fontWeight: FontWeight.bold);
+
+TextStyle textWhiteBold = textWhite.merge(textBold);
+TextStyle textBlackBold = textBlack.merge(textBold);

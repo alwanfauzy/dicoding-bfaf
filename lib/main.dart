@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:resto_app/data/model/restaurant.dart';
+import 'package:resto_app/ui/add_review_page.dart';
 import 'package:resto_app/ui/home_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
 import 'common/styles.dart';
@@ -39,7 +40,10 @@ class MyApp extends StatelessWidget {
         RestaurantDetailPage.routeName: ((context) => RestaurantDetailPage(
               restaurant:
                   ModalRoute.of(context)?.settings.arguments as Restaurant,
-            ))
+            )),
+        AddReviewPage.routeName: ((context) => AddReviewPage(
+            restaurantId:
+                ModalRoute.of(context)?.settings.arguments as String)),
       },
     );
   }

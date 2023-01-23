@@ -6,6 +6,7 @@ import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/data/model/restaurant_detail.dart';
 import 'package:resto_app/provider/restaurant_detail_provider.dart';
+import 'package:resto_app/ui/add_review_page.dart';
 import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';
 
@@ -21,22 +22,19 @@ class RestaurantDetailPage extends StatefulWidget {
 }
 
 class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
-  late Future<RestaurantDetailResult> _restaurantDetail;
-
   @override
   void initState() {
     super.initState();
-    _restaurantDetail = ApiService().detailRestaurant(widget.restaurant.id);
   }
 
   Widget _buildDetail(BuildContext context) {
-    return Consumer<RestaurantDetailProvider>(builder: ((context, value, _) {
-      switch (value.state) {
+    return Consumer<RestaurantDetailProvider>(builder: ((context, provider, _) {
+      switch (provider.state) {
         case ResultState.loading:
           return const Center(child: CircularProgressIndicator());
         case ResultState.hasData:
           {
-            var restaurantDetail = value.result.restaurant;
+            var restaurantDetail = provider.result.restaurant;
 
             return SingleChildScrollView(
               child: Padding(
@@ -45,10 +43,10 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 child: Column(
                   children: [
                     _buildRestaurantInfo(context, restaurantDetail),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    _buildRestaurantMenu(context, restaurantDetail?.menus)
+                    const SizedBox(height: 16),
+                    _buildRestaurantMenu(context, restaurantDetail?.menus),
+                    const SizedBox(height: 16),
+                    _buildReviewList(context, restaurantDetail, provider)
                   ],
                 ),
               ),
@@ -56,7 +54,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           }
         case ResultState.noData:
         case ResultState.error:
-          return ErrorText(errorMessage: value.message);
+          return ErrorText(errorMessage: provider.message);
         default:
           return const Center(child: Text(''));
       }
@@ -94,10 +92,9 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
                 ],
               ),
             ),
-            const SizedBox(
-              width: 8,
-            ),
+            const SizedBox(width: 8),
             RatingBar.builder(
+              ignoreGestures: true,
               initialRating: detail?.rating ?? 0,
               minRating: 1,
               direction: Axis.horizontal,
@@ -113,10 +110,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             ),
           ],
         ),
-        const Divider(
-          color: primaryLightColor,
-          thickness: 1,
-        ),
+        const Divider(color: primaryLightColor, thickness: 1),
         Text(
           detail?.description ?? "Empty Description",
           textAlign: TextAlign.justify,
@@ -135,9 +129,13 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         if (menu != null) ...[
-          _buildBeverageList(context, "Available Foods", menu.foods),
-          const Divider(thickness: 1, color: primaryLightColor),
-          _buildBeverageList(context, "Available Drinks", menu.drinks),
+          _buildBeverageList(context, "Foods", menu.foods),
+          const Divider(
+            thickness: 1,
+            color: primaryLightColor,
+            height: 24,
+          ),
+          _buildBeverageList(context, "Drinks", menu.drinks),
         ] else ...[
           const ErrorText(errorMessage: "Empty Menus")
         ]
@@ -147,38 +145,147 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
 
   Widget _buildBeverageList(
       BuildContext context, String title, List<Category?>? beverages) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(
-        title,
-        style: Theme.of(context).textTheme.bodyLarge?.merge(textWhite),
-      ),
-      const SizedBox(
-        height: 8,
-      ),
-      if (beverages == null) ...[
-        const ErrorText(errorMessage: "Empty"),
-      ] else ...[
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: List.generate(beverages.length,
-              (index) => _buildBeverageItem(context, beverages[index])),
-        ),
-      ]
-    ]);
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineSmall?.merge(textWhite),
+          ),
+          const SizedBox(height: 16),
+          if (beverages == null) ...[
+            const ErrorText(errorMessage: "Empty"),
+          ] else ...[
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: List.generate(beverages.length,
+                  (index) => _buildBeverageItem(context, beverages[index])),
+            ),
+          ]
+        ]);
   }
 
   Widget _buildBeverageItem(BuildContext context, Category? beverage) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: const BoxDecoration(
-        color: primaryDarkColor,
-        borderRadius: BorderRadius.all(Radius.circular(4)),
+        color: primaryLightColor,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
       child: Text(
         beverage?.name ?? "-",
-        style: Theme.of(context).textTheme.bodySmall?.merge(textWhite),
+        style: Theme.of(context).textTheme.bodySmall?.merge(textBlackBold),
       ),
+    );
+  }
+
+  Widget _buildReviewList(BuildContext context, RestaurantDetail? restaurant,
+      RestaurantDetailProvider provider) {
+    List<CustomerReview?>? reviews = restaurant?.customerReviews;
+    String? restaurantId = restaurant?.id;
+
+    return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: const BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.all(Radius.circular(15))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Reviews",
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.merge(textWhite),
+                ),
+                InkWell(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        AddReviewPage.routeName,
+                        arguments: restaurantId,
+                      ).then((value) {
+                        if (value != null && value as bool) {
+                          provider.getDetailRestaurant(widget.restaurant.id);
+                        }
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: primaryDarkColor,
+                          borderRadius: BorderRadius.circular(5)),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                    )),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ListView.separated(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                separatorBuilder: ((context, index) => const Divider(
+                      thickness: 1,
+                      color: primaryLightColor,
+                    )),
+                itemCount: reviews?.length ?? 0,
+                itemBuilder: ((context, index) =>
+                    _buildReviewItem(context, reviews![index]))),
+          ],
+        ));
+  }
+
+  Widget _buildReviewItem(BuildContext context, CustomerReview? review) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+              decoration: const BoxDecoration(
+                color: primaryLightColor,
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+              ),
+              child: Text(
+                review?.name ?? "-",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium
+                    ?.merge(textBlackBold),
+              ),
+            ),
+            const Spacer(),
+            Text(
+              review?.date ?? "-",
+              style: Theme.of(context).textTheme.caption?.merge(textWhite),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          review?.review ?? "Empty Review",
+          maxLines: 5,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall?.merge(textWhite),
+        ),
+      ],
     );
   }
 
@@ -215,8 +322,8 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           ];
         }),
         body: ChangeNotifierProvider<RestaurantDetailProvider>(
-          create: (_) => RestaurantDetailProvider(
-              apiService: ApiService(), id: widget.restaurant.id),
+          create: (_) => RestaurantDetailProvider()
+              .getDetailRestaurant(widget.restaurant.id),
           child: _buildDetail(context),
         ),
       ),
