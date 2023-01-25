@@ -255,26 +255,29 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-              decoration: const BoxDecoration(
-                color: primaryLightColor,
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-              ),
-              child: Text(
-                review?.name ?? "-",
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.merge(textBlackBold),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                decoration: const BoxDecoration(
+                  color: primaryLightColor,
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                ),
+                child: Text(
+                  review?.name ?? "-",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.merge(textBlackBold),
+                ),
               ),
             ),
-            const Spacer(),
+            const SizedBox(width: 16),
             Text(
               review?.date ?? "-",
               style: Theme.of(context).textTheme.caption?.merge(textWhite),
+              textAlign: TextAlign.end,
             ),
           ],
         ),

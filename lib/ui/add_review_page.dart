@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
-import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/provider/restaurant_detail_provider.dart';
 import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/util/util.dart';
-import 'package:resto_app/widget/error_text.dart';
 
 class AddReviewPage extends StatefulWidget {
   static const routeName = "/add_review";
@@ -54,7 +52,9 @@ class _AddReviewPageState extends State<AddReviewPage> {
     return Consumer<RestaurantDetailProvider>(builder: ((context, provider, _) {
       switch (provider.state) {
         case ResultState.loading:
-          return const CircularProgressIndicator();
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         case ResultState.noData:
         case ResultState.error:
           showToast(context, provider.message);
@@ -64,7 +64,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
                 backgroundColor: _btnState ? primaryDarkColor : primaryColor),
             onPressed: () {
               _btnState
-                  ? ApiService()
+                  ? provider
                       .addReview(
                         widget.restaurantId,
                         _nameController.text,
@@ -86,7 +86,7 @@ class _AddReviewPageState extends State<AddReviewPage> {
                 backgroundColor: _btnState ? primaryDarkColor : primaryColor),
             onPressed: () {
               _btnState
-                  ? ApiService()
+                  ? provider
                       .addReview(
                       widget.restaurantId,
                       _nameController.text,
@@ -116,58 +116,59 @@ class _AddReviewPageState extends State<AddReviewPage> {
       appBar: AppBar(
         title: const Text("Add Review"),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const SizedBox(height: 32),
-            TextFormField(
-              controller: _nameController,
-              maxLines: 1,
-              style: const TextStyle(
-                color: primaryDarkColor,
-                fontWeight: FontWeight.bold,
-              ),
-              decoration: const InputDecoration(
-                hintText: "Nama",
-                hintStyle: TextStyle(
-                  color: primaryColor,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _nameController,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: primaryDarkColor,
                   fontWeight: FontWeight.bold,
                 ),
-                icon: Icon(Icons.person),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                decoration: const InputDecoration(
+                  hintText: "Nama",
+                  hintStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  icon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _reviewController,
-              maxLines: 5,
-              style: const TextStyle(
-                color: primaryDarkColor,
-                fontWeight: FontWeight.bold,
-              ),
-              decoration: const InputDecoration(
-                hintText: "Review",
-                hintStyle: TextStyle(
-                  color: primaryColor,
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _reviewController,
+                maxLines: 5,
+                style: const TextStyle(
+                  color: primaryDarkColor,
                   fontWeight: FontWeight.bold,
                 ),
-                icon: Icon(Icons.edit),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                decoration: const InputDecoration(
+                  hintText: "Review",
+                  hintStyle: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  icon: Icon(Icons.edit),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            ChangeNotifierProvider(
-              create: (_) => RestaurantDetailProvider(),
-              child: _submitReviewButton(),
-            ),
-          ],
+              const SizedBox(height: 8),
+              ChangeNotifierProvider(
+                create: (_) => RestaurantDetailProvider(),
+                child: _submitReviewButton(),
+              ),
+            ],
+          ),
         ),
       ),
     );
