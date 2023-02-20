@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/ui/add_review_page.dart';
+import 'package:resto_app/ui/favorite_page.dart';
 import 'package:resto_app/ui/home_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
+import 'package:resto_app/ui/settings_page.dart';
 import 'common/styles.dart';
 
 void main() {
@@ -42,8 +44,11 @@ class MyApp extends StatelessWidget {
                   ModalRoute.of(context)?.settings.arguments as Restaurant,
             )),
         AddReviewPage.routeName: ((context) => AddReviewPage(
-            restaurantId:
-                ModalRoute.of(context)?.settings.arguments as String)),
+              restaurantId:
+                  ModalRoute.of(context)?.settings.arguments as String,
+            )),
+        FavoritePage.routeName: ((context) => FavoritePage()),
+        SettingsPage.routeName: ((context) => const SettingsPage()),
       },
     );
   }

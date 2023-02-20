@@ -7,9 +7,12 @@ import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/provider/restaurant_provider.dart';
+import 'package:resto_app/ui/favorite_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
+import 'package:resto_app/ui/settings_page.dart';
 import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';
+import 'package:resto_app/widget/grid_restaurant.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = "/restaurant_list_page";
@@ -44,7 +47,29 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Widget _buildHeader(BuildContext context, RestaurantProvider provider) {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: primaryLightColor,
+      body: ChangeNotifierProvider<RestaurantProvider>(
+        create: (context) => RestaurantProvider(apiService: ApiService()),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Consumer<RestaurantProvider>(
+              builder: ((context, provider, _) => _header(context, provider)),
+            ),
+            Consumer<RestaurantProvider>(
+              builder: ((context, state, _) =>
+                  Expanded(child: _body(context, state))),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _header(BuildContext context, RestaurantProvider provider) {
     return Container(
       decoration: const BoxDecoration(
           color: primaryColor,
@@ -55,25 +80,43 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 24,
-              ),
-              const Text(
-                "Discover",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.white),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Discover",
+                    style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, FavoritePage.routeName),
+                    icon: const Icon(
+                      Icons.favorite,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, SettingsPage.routeName),
+                      icon: const Icon(
+                        Icons.settings,
+                        color: Colors.white,
+                      )),
+                ],
               ),
               const Text(
                 "Restaurant",
                 style: TextStyle(
-                    fontSize: 49,
+                    fontSize: 48,
                     fontWeight: FontWeight.bold,
                     color: Colors.white),
               ),
               const SizedBox(
-                height: 8,
+                height: 16,
               ),
               Container(
                 padding: const EdgeInsets.all(5),
@@ -105,115 +148,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildRestaurantGrid(BuildContext context, RestaurantProvider state) {
+  Widget _body(BuildContext context, RestaurantProvider state) {
     switch (state.state) {
       case ResultState.loading:
         return const Center(child: CircularProgressIndicator());
       case ResultState.hasData:
-        {
-          var restaurants = state.result;
-
-          return GridView.count(
-            crossAxisCount: 2,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
-            children: List.generate(restaurants!.length,
-                (index) => _buildRestaurantItem(context, restaurants[index]!)),
-          );
-        }
+        return GridRestaurant(restaurants: state.result ?? List.empty());
       case ResultState.noData:
       case ResultState.error:
         return ErrorText(errorMessage: state.message);
       default:
         return const Center(child: Text(''));
     }
-  }
-
-  Widget _buildRestaurantItem(BuildContext context, Restaurant restaurant) {
-    double starSize = MediaQuery.of(context).size.width * 0.03;
-
-    return InkWell(
-      borderRadius: const BorderRadius.all(Radius.circular(15)),
-      onTap: () => Navigator.pushNamed(context, RestaurantDetailPage.routeName,
-          arguments: restaurant),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(15)),
-        child: GridTile(
-          header: GridTileBar(
-            leading: const CircleAvatar(
-              radius: 16,
-              backgroundColor: primaryLightColor,
-              child: Icon(
-                Icons.restaurant_menu,
-                color: primaryColor,
-              ),
-            ),
-            title: Text(restaurant.name,
-                style:
-                    Theme.of(context).textTheme.bodyMedium?.merge(textWhite)),
-            subtitle: Text(restaurant.city ?? "-",
-                style: Theme.of(context).textTheme.bodySmall?.merge(textWhite)),
-          ),
-          footer: GridTileBar(
-            title: RatingBar.builder(
-              initialRating: restaurant.rating ?? 0,
-              ignoreGestures: true,
-              minRating: 1,
-              direction: Axis.horizontal,
-              allowHalfRating: true,
-              itemCount: 5,
-              itemSize: starSize,
-              itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-              itemBuilder: (context, _) => const Icon(
-                Icons.star,
-                color: secondaryLightColor,
-              ),
-              onRatingUpdate: (rating) {},
-            ),
-          ),
-          child: Hero(
-            tag: restaurant.id,
-            child: Stack(children: [
-              Positioned.fill(
-                child: Image.network(
-                  ApiService()
-                      .picture(restaurant.pictureId!, PictureSize.small),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Container(
-                color: Colors.black.withOpacity(0.6),
-              )
-            ]),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAndroid(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryLightColor,
-      body: ChangeNotifierProvider<RestaurantProvider>(
-        create: (context) => RestaurantProvider(apiService: ApiService()),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Consumer<RestaurantProvider>(
-                builder: ((context, provider, _) =>
-                    _buildHeader(context, provider))),
-            Consumer<RestaurantProvider>(
-                builder: ((context, state, _) =>
-                    Expanded(child: _buildRestaurantGrid(context, state)))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildAndroid(context);
   }
 }
