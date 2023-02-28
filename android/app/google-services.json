@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "20856260397",
+    "project_id": "restoapp-dicoding",
+    "storage_bucket": "restoapp-dicoding.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:20856260397:android:0d2224b2585b50a5c035a4",
+        "android_client_info": {
+          "package_name": "com.example.resto_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "20856260397-ohl8kuej74v1maq07li5ducqbhfo8nc3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn53RhnbO4wA5TaOYd0Fs5fP7kS5zUxiU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "20856260397-ohl8kuej74v1maq07li5ducqbhfo8nc3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
