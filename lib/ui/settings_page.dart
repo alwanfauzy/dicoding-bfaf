@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:resto_app/data/local/pref_setting.dart';
 import '../common/styles.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -13,16 +13,25 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _reminderIsActive = false;
+  var prefSetting = PrefSetting();
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    _initReminder();
+  }
+
+  _initReminder() async {
+    var value = await prefSetting.getReminder();
+    setState(() {
+      _reminderIsActive = value;
+    });
   }
 
   _onReminderSwitchClicked() {
     setState(() {
       _reminderIsActive = !_reminderIsActive;
+      prefSetting.saveReminder(_reminderIsActive);
     });
   }
 
