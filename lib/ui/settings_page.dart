@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:resto_app/data/local/pref_setting.dart';
+import 'package:resto_app/provider/scheduling_provider.dart';
+import 'package:resto_app/ui/restaurant_detail_page.dart';
+import 'package:resto_app/util/notification_helper.dart';
 import '../common/styles.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -47,31 +51,49 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _body(BuildContext context) {
-    return InkWell(
-      splashColor: primaryColor,
-      onTap: () => _onReminderSwitchClicked(),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 32,
+    return ChangeNotifierProvider<SchedulingProvider>(
+      create: (_) => SchedulingProvider(),
+      child: _buildOptions(),
+    );
+  }
+
+  Widget _buildOption(String title, Widget trailing) {
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Text(
+          title,
+          style: Theme.of(context).textTheme.bodyMedium?.merge(textWhiteBold),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              "Daily Reminder",
-              style:
-                  Theme.of(context).textTheme.bodyMedium?.merge(textWhiteBold),
-            ),
-            Switch(
-              activeColor: secondaryDarkColor,
-              value: _reminderIsActive,
-              onChanged: (value) => _onReminderSwitchClicked(),
-            )
-          ],
-        ),
+        trailing: trailing,
       ),
+    );
+  }
+
+  Widget _buildOptions() {
+    return ListView(
+      children: [
+        _buildOption(
+          "Dark Theme",
+          Switch.adaptive(
+            value: false,
+            onChanged: (bool value) {},
+          ),
+        ),
+        _buildOption(
+          "Scheduling Restaurant",
+          Consumer<SchedulingProvider>(
+            builder: (context, scheduled, _) {
+              return Switch.adaptive(
+                value: scheduled.isScheduled,
+                onChanged: (value) async {
+                  scheduled.scheduledRestaurant(value);
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

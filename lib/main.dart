@@ -1,14 +1,38 @@
+import 'dart:io';
+
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/ui/add_review_page.dart';
 import 'package:resto_app/ui/favorite_page.dart';
 import 'package:resto_app/ui/home_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
 import 'package:resto_app/ui/settings_page.dart';
+import 'package:resto_app/util/background_service.dart';
+import 'package:resto_app/util/notification_helper.dart';
 import 'common/styles.dart';
 
-void main() {
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await initNotifications();
+
   runApp(const MyApp());
+}
+
+Future<void> initNotifications() async {
+  final NotificationHelper notificationHelper = NotificationHelper();
+  final BackgroundService service = BackgroundService();
+  service.initializeIsolate();
+
+  if (Platform.isAndroid) {
+    await AndroidAlarmManager.initialize();
+  }
+  await notificationHelper.initNotifications(flutterLocalNotificationsPlugin);
 }
 
 class MyApp extends StatelessWidget {

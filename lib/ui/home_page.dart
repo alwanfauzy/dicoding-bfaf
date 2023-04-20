@@ -11,6 +11,7 @@ import 'package:resto_app/ui/favorite_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
 import 'package:resto_app/ui/settings_page.dart';
 import 'package:resto_app/util/enums.dart';
+import 'package:resto_app/util/notification_helper.dart';
 import 'package:resto_app/widget/error_text.dart';
 import 'package:resto_app/widget/grid_restaurant.dart';
 
@@ -24,6 +25,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final NotificationHelper _notificationHelper = NotificationHelper();
+
   String _searchText = "";
   Timer? _debounce;
 
@@ -42,8 +45,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _notificationHelper.configureSelectNotificationSubject(
+      RestaurantDetailPage.routeName,
+    );
+  }
+
+  @override
   void dispose() {
     _debounce?.cancel();
+    selectNotificationSubject.close();
     super.dispose();
   }
 
