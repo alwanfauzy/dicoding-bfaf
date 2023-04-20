@@ -3,8 +3,10 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
+import 'package:resto_app/data/db/database_helper.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/data/model/restaurant_detail.dart';
+import 'package:resto_app/provider/database_provider.dart';
 import 'package:resto_app/provider/restaurant_detail_provider.dart';
 import 'package:resto_app/ui/add_review_page.dart';
 import 'package:resto_app/util/enums.dart';
@@ -299,28 +301,10 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
       body: NestedScrollView(
         headerSliverBuilder: ((context, innerBoxIsScrolled) {
           return [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: 250,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Hero(
-                  tag: widget.restaurant.id,
-                  child: Stack(children: [
-                    Positioned.fill(
-                      child: Image.network(
-                        ApiService().picture(
-                            widget.restaurant.pictureId!, PictureSize.medium),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Container(
-                      color: Colors.black.withOpacity(0.6),
-                    )
-                  ]),
-                ),
-                title: Text(widget.restaurant.name),
-                titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
-              ),
+            ChangeNotifierProvider<DatabaseProvider>(
+              create: (context) =>
+                  DatabaseProvider(databaseHelper: DatabaseHelper()),
+              child: _appBar(),
             ),
           ];
         }),
@@ -329,6 +313,47 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
               .getDetailRestaurant(widget.restaurant.id),
           child: _buildDetail(context),
         ),
+      ),
+    );
+  }
+
+  Widget _appBar() {
+    return SliverAppBar(
+      actions: [
+        Consumer<DatabaseProvider>(
+            builder: (context, provider, child) => FutureBuilder<bool>(
+                future: provider.isFavorited(widget.restaurant.id),
+                builder: ((context, snapshot) {
+                  var isFavorited = snapshot.data ?? false;
+                  return IconButton(
+                    icon: Icon(
+                        (isFavorited) ? Icons.favorite : Icons.favorite_border),
+                    onPressed: () => (isFavorited)
+                        ? provider.removeFavorite(widget.restaurant.id)
+                        : provider.addFavorite(widget.restaurant),
+                  );
+                })))
+      ],
+      pinned: true,
+      expandedHeight: 250,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Hero(
+          tag: widget.restaurant.id,
+          child: Stack(children: [
+            Positioned.fill(
+              child: Image.network(
+                ApiService()
+                    .picture(widget.restaurant.pictureId!, PictureSize.medium),
+                fit: BoxFit.cover,
+              ),
+            ),
+            Container(
+              color: Colors.black.withOpacity(0.6),
+            )
+          ]),
+        ),
+        title: Text(widget.restaurant.name),
+        titlePadding: const EdgeInsets.only(left: 56, bottom: 16),
       ),
     );
   }

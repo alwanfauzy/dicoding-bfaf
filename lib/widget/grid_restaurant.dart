@@ -8,8 +8,13 @@ import 'package:resto_app/util/enums.dart';
 
 class GridRestaurant extends StatelessWidget {
   final List<Restaurant?> restaurants;
+  final VoidCallback? navigatorCallback;
 
-  const GridRestaurant({Key? key, required this.restaurants}) : super(key: key);
+  const GridRestaurant({
+    Key? key,
+    required this.restaurants,
+    this.navigatorCallback,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,7 @@ class GridRestaurant extends StatelessWidget {
         context,
         RestaurantDetailPage.routeName,
         arguments: restaurant,
-      ),
+      ).then((value) => navigatorCallback?.call()),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(15)),
         child: GridTile(

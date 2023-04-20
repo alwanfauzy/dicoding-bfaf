@@ -49,6 +49,7 @@ dependencies:
   logger: ^1.2.2
   intl: ^0.18.0
   android_alarm_manager_plus: ^2.1.2
+  sqflite: ^2.2.6
 
 dev_dependencies:
   flutter_test:
