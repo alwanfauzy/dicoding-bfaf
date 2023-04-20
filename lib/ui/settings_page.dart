@@ -1,43 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:resto_app/data/local/pref_setting.dart';
 import 'package:resto_app/provider/scheduling_provider.dart';
-import 'package:resto_app/ui/restaurant_detail_page.dart';
-import 'package:resto_app/util/notification_helper.dart';
 import '../common/styles.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends StatelessWidget {
   static const routeName = "/settings";
 
-  const SettingsPage({Key? key}) : super(key: key);
-
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  bool _reminderIsActive = false;
-  var prefSetting = PrefSetting();
-
-  @override
-  void initState() {
-    super.initState();
-    _initReminder();
-  }
-
-  _initReminder() async {
-    var value = await prefSetting.getReminder();
-    setState(() {
-      _reminderIsActive = value;
-    });
-  }
-
-  _onReminderSwitchClicked() {
-    setState(() {
-      _reminderIsActive = !_reminderIsActive;
-      prefSetting.saveReminder(_reminderIsActive);
-    });
-  }
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +22,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _body(BuildContext context) {
     return ChangeNotifierProvider<SchedulingProvider>(
       create: (_) => SchedulingProvider(),
-      child: _buildOptions(),
+      child: _buildOptions(context),
     );
   }
 
-  Widget _buildOption(String title, Widget trailing) {
+  Widget _buildOption(BuildContext context, String title, Widget trailing) {
     return Material(
       color: Colors.transparent,
       child: ListTile(
@@ -70,17 +39,11 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildOptions() {
+  Widget _buildOptions(BuildContext context) {
     return ListView(
       children: [
         _buildOption(
-          "Dark Theme",
-          Switch.adaptive(
-            value: false,
-            onChanged: (bool value) {},
-          ),
-        ),
-        _buildOption(
+          context,
           "Scheduling Restaurant",
           Consumer<SchedulingProvider>(
             builder: (context, scheduled, _) {
