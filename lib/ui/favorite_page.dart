@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
-import 'package:resto_app/data/db/database_helper.dart';
+import 'package:resto_app/data/local/db/database_helper.dart';
 import 'package:resto_app/provider/database_provider.dart';
 import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';

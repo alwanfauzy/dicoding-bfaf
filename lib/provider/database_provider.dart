@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:resto_app/data/db/database_helper.dart';
+import 'package:resto_app/data/local/db/database_helper.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/util/enums.dart';
 

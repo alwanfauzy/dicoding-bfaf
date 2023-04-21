@@ -3,7 +3,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
-import 'package:resto_app/data/db/database_helper.dart';
+import 'package:resto_app/data/local/db/database_helper.dart';
 import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/data/model/restaurant_detail.dart';
 import 'package:resto_app/provider/database_provider.dart';
