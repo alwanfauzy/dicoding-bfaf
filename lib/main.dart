@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
               restaurantId:
                   ModalRoute.of(context)?.settings.arguments as String,
             )),
-        FavoritePage.routeName: ((context) => FavoritePage()),
+        FavoritePage.routeName: ((context) => const FavoritePage()),
         SettingsPage.routeName: ((context) => const SettingsPage()),
       },
     );

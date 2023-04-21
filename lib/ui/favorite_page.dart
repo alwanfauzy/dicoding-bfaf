@@ -7,16 +7,11 @@ import 'package:resto_app/util/enums.dart';
 import 'package:resto_app/widget/error_text.dart';
 import 'package:resto_app/widget/grid_restaurant.dart';
 
-class FavoritePage extends StatefulWidget {
+class FavoritePage extends StatelessWidget {
   static const routeName = "/favorite";
 
   const FavoritePage({Key? key}) : super(key: key);
 
-  @override
-  _FavoritePageState createState() => _FavoritePageState();
-}
-
-class _FavoritePageState extends State<FavoritePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

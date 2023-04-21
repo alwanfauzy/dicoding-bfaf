@@ -278,7 +278,7 @@ class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
             const SizedBox(width: 16),
             Text(
               review?.date ?? "-",
-              style: Theme.of(context).textTheme.caption?.merge(textWhite),
+              style: Theme.of(context).textTheme.bodySmall?.merge(textWhite),
               textAlign: TextAlign.end,
             ),
           ],

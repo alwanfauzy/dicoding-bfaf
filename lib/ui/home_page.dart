@@ -1,11 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:resto_app/common/styles.dart';
 import 'package:resto_app/data/api/api_service.dart';
-import 'package:resto_app/data/model/restaurant.dart';
 import 'package:resto_app/provider/restaurant_provider.dart';
 import 'package:resto_app/ui/favorite_page.dart';
 import 'package:resto_app/ui/restaurant_detail_page.dart';
@@ -139,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                   onChanged: (text) => _onSearchChanged(text, provider),
                   textAlignVertical: TextAlignVertical.center,
                   style:
-                      Theme.of(context).textTheme.bodyText2?.merge(textWhite),
+                      Theme.of(context).textTheme.bodyMedium?.merge(textWhite),
                   decoration: const InputDecoration(
                       border: InputBorder.none,
                       prefixIcon: Icon(
