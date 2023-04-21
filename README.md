@@ -27,10 +27,13 @@ A restaurant app based on flutter.
    - splash screen,
    - atau yang lainnya.
 
+## Improvisasi
+- Pencarian (UI)
+- Splash Screen
 ## Hasil Submission
 Rating: :star: :star: :star: :star: :star:   
 
-![Dokumentasi Aplikasi](https://drive.google.com/uc?id=1DcG_lrq_fl2wU9oWq4sOwnO03F--PKbM)
+![Dokumentasi Aplikasi](https://drive.google.com/uc?id=1MB_R3Gy8fXjkyGEtJexkz47rG0FlH-xS)
   
   
 ---
@@ -38,11 +41,6 @@ Rating: :star: :star: :star: :star: :star:
 > **Saya tidak bertanggung jawab atas hukuman plagiasi dari pihak dicoding, projek ini saya bagikan sebagai referensi dan *showcase* dari projek yang telah saya kerjakan.**
 
 Terima kasih telah mengunjungi repo ini, semoga bisa bermanfaat. Bantu dukung saya dengan menambahkan bintang pada projek ini. :smiley:
-
-Kunjungi juga projek terkait yang telah saya buat :
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
 Ada pertanyaan atau ingin berkolaborasi? Kontak saya di :
 - [Linkedin](https://www.linkedin.com/in/alwanfauzy)
