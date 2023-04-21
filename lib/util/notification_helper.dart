@@ -65,7 +65,7 @@ class NotificationHelper {
     );
 
     var titleNotification = "<b>RestoApp</b>";
-    var titleRestaurant = restaurants.restaurants![0]?.name;
+    var titleRestaurant = restaurants.restaurants!.randomItem()!.name;
 
     await flutterLocalNotificationsPlugin.show(
         0, titleNotification, titleRestaurant, platformChannelSpecifics,
