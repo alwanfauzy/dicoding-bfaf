@@ -3,12 +3,18 @@
 A restaurant app based on flutter.
 
 ## Kriteria Submission
-1. Halaman Daftar Restoran
-   - Menampilkan daftar restoran dengan informasi singkat.
-   - Data restoran menggunakan berkas JSON yang tersedia pada **Resources**.
-2. Halaman Detail Restoran
-   - Menampilkan detail informasi ketika salah satu item ditekan
 
+1. Daftar restoran
+   - Menampilkan daftar restoran dengan informasi singkat dari API.
+   - Menampilkan gambar restoran yang didapat dari API.
+2. Detail restoran
+   - Menampilkan detail informasi ketika salah satu item ditekan, seperti deskripsi, kota, rating, menu makanan dan menu minuman.
+   - Menampilkan gambar restoran yang didapat dari API.
+3. Pencarian restoran
+   - Menampilkan hasil pencarian restoran berdasarkan menu atau nama restoran.
+4. Terdapat indikator loading saat aplikasi memuat data.
+5. Menampilkan pesan error yang mudah dipahami oleh user ketika aplikasi diakses tanpa koneksi internet.
+6. Menggunakan salah satu library state management seperti provider, bloc, redux, dsb.
 ## Saran Submission
 - [x] Menuliskan kode dengan bersih.
    - Bersihkan komentar dan kode yang tidak digunakan.
@@ -22,15 +28,16 @@ A restaurant app based on flutter.
    - Penggunaan komponen yang sesuai dengan fungsinya.
 - [x] Aplikasi bisa memberikan pesan eror jika data tidak berhasil ditampilkan.
 - [x] Menambahkan animasi yang membuat tampilan menjadi menarik.
-- [x] Terdapat improvisasi fitur, contoh:
-   - pencarian,
-   - splash screen,
-   - atau yang lainnya.
+- [x] Terdapat improvisasi fitur, contoh: menambahkan dan menampilkan review.
+
+## Improvisasi
+- Reactive debounce search
+- Menambahkan dan menampilkan review
 
 ## Hasil Submission
 Rating: :star: :star: :star: :star: :star:   
 
-![Dokumentasi Aplikasi](https://drive.google.com/uc?id=1DcG_lrq_fl2wU9oWq4sOwnO03F--PKbM)
+![Dokumentasi Aplikasi](https://drive.google.com/uc?id=1_turkXbBJ9zVVTjA6MEmg-QHng64CIUb)
   
   
 ---
@@ -38,11 +45,6 @@ Rating: :star: :star: :star: :star: :star:
 > **Saya tidak bertanggung jawab atas hukuman plagiasi dari pihak dicoding, projek ini saya bagikan sebagai referensi dan *showcase* dari projek yang telah saya kerjakan.**
 
 Terima kasih telah mengunjungi repo ini, semoga bisa bermanfaat. Bantu dukung saya dengan menambahkan bintang pada projek ini. :smiley:
-
-Kunjungi juga projek terkait yang telah saya buat :
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
 Ada pertanyaan atau ingin berkolaborasi? Kontak saya di :
 - [Linkedin](https://www.linkedin.com/in/alwanfauzy)
