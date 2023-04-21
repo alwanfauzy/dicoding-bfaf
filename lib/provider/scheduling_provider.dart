@@ -1,18 +1,24 @@
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:resto_app/data/local/pref/scheduling_pref.dart';
 import 'package:resto_app/util/background_service.dart';
 import 'package:resto_app/util/date_time_helper.dart';
 
 class SchedulingProvider extends ChangeNotifier {
-  bool _isScheduled = false;
+  SchedulingPref schedulingPref = SchedulingPref();
+  bool _scheduling = false;
 
-  bool get isScheduled => _isScheduled;
+  bool get scheduling => _scheduling;
 
-  Future<bool> scheduledRestaurant(bool value) async {
-    _isScheduled = value;
-    if (_isScheduled) {
-      print('Scheduling Restaurant Activated');
-      notifyListeners();
+  Future<bool> setScheduling(bool value) async {
+    _scheduling = value;
+    schedulingPref.setScheduling(value);
+    notifyListeners();
+
+    if (_scheduling) {
+      if (kDebugMode) {
+        print('Scheduling Restaurant Activated');
+      }
       return await AndroidAlarmManager.periodic(
         const Duration(hours: 24),
         1,
@@ -22,8 +28,9 @@ class SchedulingProvider extends ChangeNotifier {
         wakeup: true,
       );
     } else {
-      print('Scheduling Restaurant Canceled');
-      notifyListeners();
+      if (kDebugMode) {
+        print('Scheduling Restaurant Canceled');
+      }
       return await AndroidAlarmManager.cancel(1);
     }
   }

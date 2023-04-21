@@ -3,10 +3,28 @@ import 'package:provider/provider.dart';
 import 'package:resto_app/provider/scheduling_provider.dart';
 import '../common/styles.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   static const routeName = "/settings";
 
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final _schedulingProvider = SchedulingProvider();
+
+  @override
+  void initState() {
+    super.initState();
+    initScheduling();
+  }
+
+  void initScheduling() async {
+    bool scheduling = await _schedulingProvider.schedulingPref.getScheduling();
+    _schedulingProvider.setScheduling(scheduling);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +38,8 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _body(BuildContext context) {
-    return ChangeNotifierProvider<SchedulingProvider>(
-      create: (_) => SchedulingProvider(),
+    return ChangeNotifierProvider(
+      create: (_) => _schedulingProvider,
       child: _buildOptions(context),
     );
   }
@@ -46,14 +64,12 @@ class SettingsPage extends StatelessWidget {
           context,
           "Scheduling Restaurant",
           Consumer<SchedulingProvider>(
-            builder: (context, scheduled, _) {
-              return Switch.adaptive(
-                value: scheduled.isScheduled,
-                onChanged: (value) async {
-                  scheduled.scheduledRestaurant(value);
-                },
-              );
-            },
+            builder: (context, provider, _) => Switch.adaptive(
+              value: provider.scheduling,
+              onChanged: (value) {
+                provider.setScheduling(value);
+              },
+            ),
           ),
         ),
       ],

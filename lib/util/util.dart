@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void showToast(BuildContext context, String message) {
@@ -10,4 +12,10 @@ void showToast(BuildContext context, String message) {
           label: 'CLOSE', onPressed: scaffold.hideCurrentSnackBar),
     ),
   );
+}
+
+extension RandomListItem<T> on List<T> {
+  T randomItem() {
+    return this[Random().nextInt(length)];
+  }
 }
